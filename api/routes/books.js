@@ -48,8 +48,10 @@ const upload = multer({
 
 });
 
+router.get('/', BookController.books_get_all);
 
 router.post('/', checkAuth , upload.single('coverImage') , BookController.books_create_book);
 
+router.get('/:bookId', BookController.books_get_book);
 
 module.exports = router;
