@@ -52,6 +52,10 @@ router.get('/', BookController.books_get_all);
 
 router.post('/', checkAuth , upload.single('coverImage') , BookController.books_create_book);
 
-router.get('/:bookId', BookController.books_get_book);
+router.get('/:bookId', BookController.books_get_book); 
+
+router.patch('/:bookId', checkAuth , BookController.books_update_book);
+
+router.delete('/:bookId', checkAuth , BookController.books_delete);
 
 module.exports = router;

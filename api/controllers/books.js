@@ -10,22 +10,22 @@ exports.books_get_all = (req, res, next) =>{
 	Book.find()
 	.select('name author _id coverImage')
 	.exec()
-	.then(docs => {
+	.then(books => {
 
 		const response ={
 
-			count: docs.length,
-			books: docs.map(doc => {
+			count: books.length,
+			books: books.map(book => {
 
 				return {
 
-					name: doc.name, 
-					author: doc.author,
-					coverImage: doc.coverImage,
-					_id: doc._id,
+					name: book.name, 
+					author: book.author,
+					coverImage: book.coverImage,
+					_id: book._id,
 					request: {
 						type: 'GET', 
-						url: 'http://localhost:3000/books/' + doc._id
+						url: 'http://localhost:3000/books/' + book._id
 
 
 
@@ -144,19 +144,19 @@ exports.books_get_book = (req, res, next)=>{
 	Book.findById(id)
 	.select('name author _id coverImage')
 	.exec()
-	.then(doc =>{
+	.then(book =>{
 
-		console.log("From Database",doc);
+		console.log("From Database",book);
 
 		
 
-		if(doc){
+		if(book){
 
 			//res.status(200).json(doc);
 
 			res.status(200).json({
 
-				book: doc, 
+				book: book, 
 				request: {
 
 					type: 'GET',
@@ -188,4 +188,87 @@ exports.books_get_book = (req, res, next)=>{
 
 	
 
+}
+
+
+exports.books_update_book = (req, res, next)=>{
+
+	const id = req.params.bookId;
+	const updateOps = {}
+	for (const ops of req.body){
+
+		updateOps[ops.book] = ops.value;
+
+	}
+	Book.update({_id: id}, { $set: updateOps})
+	.exec()
+	.then(result  =>{
+
+		//console.log(result);
+		//res.status(200).json(result);
+		res.status(200).json({
+
+			message: 'Book updated',
+			request:{
+				type: 'GET',
+				url: 'http://localhost:3000/books/' + id 
+
+			}
+			
+
+
+		});
+
+
+	})
+	.catch(err =>{
+
+		console.log(err);
+		res.status(500).json({
+
+			error: err
+
+		});
+
+	});
+	
+
+}
+
+exports.books_delete = (req, res, next)=>{
+
+	
+	const id = req.params.bookId;
+	Book.remove({_id: id})
+	.exec()
+	.then(result => {
+
+		//res.status(200).json(result);
+		res.status(200).json({
+
+			message: 'Book deleted',
+			request:{
+				type: 'POST',
+				url: 'http://localhost:3000/books', 
+				body: {name: 'String', author: 'String' , publisher: 'String' , isbn: 'String'}
+
+			}});
+	
+
+
+
+	})
+	.catch(err =>{
+
+		console.log(err);
+		res.status(500).json({
+
+			error: err
+
+		});
+
+	});
+
+
+	
 }
