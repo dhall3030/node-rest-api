@@ -54,10 +54,22 @@ app.use((req, res,next) =>{
 
 
 
+app.use((req, res,next) =>{
+
+	res.locals.baseUrl = req.protocol+'://'+req.headers.host;
+	return next();
+
+});
+
+
+
 //routes that should handle requests 
 
 app.use('/users', userRoutes);
 app.use('/books', bookRoutes);
+
+
+
 
 //error handling
 app.use((req, res, next)=>{

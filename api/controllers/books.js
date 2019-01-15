@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Book =require('../models/book');
-
+const fs = require('fs');
 
 
 
@@ -8,7 +8,7 @@ exports.books_get_all = (req, res, next) =>{
 
 	
 	Book.find()
-	.select('name author _id coverImage')
+	.select('name author _id coverImage publisher isbn')
 	.exec()
 	.then(books => {
 
@@ -23,6 +23,8 @@ exports.books_get_all = (req, res, next) =>{
 					author: book.author,
 					coverImage: book.coverImage,
 					_id: book._id,
+					publisher: book.publisher,
+					isbn: book.isbn,
 					request: {
 						type: 'GET', 
 						url: 'http://localhost:3000/books/' + book._id
@@ -77,6 +79,11 @@ exports.books_create_book = (req, res, next) =>{
 
 	
 	console.log(req.file);
+	
+	const path = res.locals.baseUrl+'/'+req.file.path.replace("\\", "/"); 
+
+	
+
 	const book = new Book({
 
 		_id: new mongoose.Types.ObjectId(),
@@ -85,7 +92,7 @@ exports.books_create_book = (req, res, next) =>{
 		publisher: req.body.publisher,
 		isbn: req.body.isbn,
 		//cover image
-		coverImage: req.file.path
+		coverImage: path
 
 
 
@@ -243,6 +250,9 @@ exports.books_delete = (req, res, next)=>{
 	.exec()
 	.then(result => {
 
+		
+
+
 		//res.status(200).json(result);
 		res.status(200).json({
 
@@ -271,4 +281,102 @@ exports.books_delete = (req, res, next)=>{
 
 
 	
+}
+
+
+exports.books_update_img = (req, res, next)=>{
+
+
+	console.log(req.file);
+	
+	const path = res.locals.baseUrl+'/'+req.file.path.replace("\\", "/"); 
+
+	const id = req.params.bookId
+
+	Book.findOne({
+
+		_id: req.params.bookId
+
+	})
+	.exec()
+	.then(book=>{
+
+		
+
+		if(req.file){
+
+			if(book.coverImage){
+
+				const oldImg = book.coverImage.split("/");
+
+
+
+				fs.unlink("uploads\\"+oldImg[4], function() {
+			      console.log("image deleted")
+	    		});
+
+			}
+
+			
+
+
+			
+
+		}
+
+
+
+
+
+
+		book.coverImage = path;
+
+		book.save()
+		.then(book=>{
+
+			res.status(200).json({
+
+				message: 'Book updated',
+				request:{
+					type: 'GET',
+					url: 'http://localhost:3000/books/' + id 
+
+				}
+			
+
+
+			});
+
+
+		}).catch(err =>{
+
+
+			console.log(err);
+			res.status(500).json({
+
+			error: err
+
+			});
+
+
+
+		});
+
+
+	})
+	.catch(err =>{
+
+		console.log(err);
+		res.status(500).json({
+
+			error: err
+
+		});
+
+
+    });
+
+
+
+
 }

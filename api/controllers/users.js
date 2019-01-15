@@ -49,10 +49,28 @@ exports.user_signup = (req, res, next)=>{
 						
 						user.save()
 						.then(result => {
+							
 							console.log(result);
+
+							//make token 
+							const token = jwt.sign({
+							email: result.email,
+							userId: result._id
+							}, 
+							process.env.JWT_KEY, 
+							{
+
+							expiresIn: "1h"
+
+							});
+
+
 							res.status(201).json({
 
-								message: 'User created'
+								message: 'User created',
+								token: token,
+								userId: result._id
+
 
 							});
 
@@ -120,6 +138,8 @@ exports.user_login = (req, res, next) =>{
 			}
 			if(result) {
 
+				const ID = user[0]._id;
+
 				const token = jwt.sign({
 						email: user[0].email,
 						userId: user[0]._id
@@ -139,7 +159,8 @@ exports.user_login = (req, res, next) =>{
 
 					
 					message: 'Auth successfull',
-					token: token
+					token: token,
+					userId: ID
 
 
 				});
